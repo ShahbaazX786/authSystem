@@ -1,4 +1,4 @@
-import bcryptjs from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import User from '../models/user.model.js';
 import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js';
 import generateVerificationToken from '../utils/generateVerificationToken.js';
@@ -15,7 +15,7 @@ export const SignUp = async (req, res) => {
             return res.status(400).json({ success: false, message: "User Already Exists" });
         }
 
-        const hashedPassword = await bcryptjs.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
         const verificationToken = generateVerificationToken();
         const user = new User({ email, password: hashedPassword, name, verificationToken, verificationTokenExpiresAt: get24HoursInMilliseconds() });
         await user.save();
@@ -40,4 +40,25 @@ export const LogIn = async (req, res) => {
 
 export const LogOut = async (req, res) => {
     res.send("Logout Page");
+}
+
+export const DeleteUser = async (req, res) => {
+    const { email } = req.body;
+    try {
+        if (!email) {
+            throw new Error('Bruh just give an email');
+        }
+        const userAlreadyExists = await User.findOne({ email });
+        if (!userAlreadyExists) {
+            throw new Error('Bruh this email is not registered');
+        } else {
+            const result = await User.findOneAndDelete({ email });
+            if (result) {
+                res.status(200).json({ success: true, message: "Deleted that User" });
+            }
+        }
+
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
 }
