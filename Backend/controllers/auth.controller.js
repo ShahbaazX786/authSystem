@@ -3,6 +3,7 @@ import User from '../models/user.model.js';
 import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js';
 import generateVerificationToken from '../utils/generateVerificationToken.js';
 import { get24HoursInMilliseconds } from '../utils/getSimpleThings.js';
+import { refreshCurrentToken } from '../utils/refreshToken.js';
 
 export const SignUp = async (req, res) => {
     const { email, password, name } = req.body;
@@ -41,6 +42,37 @@ export const LogIn = async (req, res) => {
 export const LogOut = async (req, res) => {
     res.send("Logout Page");
 }
+
+export const refreshToken = async (req, res) => {
+    console.warn(req.body)
+    const { currentToken, email } = req.body;
+
+    if (!currentToken || !email) {
+        return res.status(400).json({ message: 'Token and email are required.' });
+    }
+
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        const { refreshed, token, tokenValidTill } = refreshCurrentToken(currentToken, user._id.toString());
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            path: "/",
+        });
+
+        return res.status(200).json({ token, refreshed, tokenValidTill });
+    } catch (err) {
+        console.error("Token refresh error:", err);
+        return res.status(401).json({ message: 'Invalid or expired token.' });
+    }
+};
 
 export const DeleteUser = async (req, res) => {
     const { email } = req.body;
