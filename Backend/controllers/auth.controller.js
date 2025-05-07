@@ -36,7 +36,28 @@ export const SignUp = async (req, res) => {
 }
 
 export const LogIn = async (req, res) => {
-    res.send("Login Page");
+    const { email, password } = req.body;
+    try {
+        if (!email || !password) {
+            throw new Error('Email and Password are required');
+        }
+        const user = await User.findOne({ email });
+        if (!user) {
+            res.status(404).json({ success: false, message: "Invalid Email or User not Found" });
+        }
+
+        const isPasswordMatching = await bcrypt.compare(password, user.password);
+        if (!isPasswordMatching) {
+            res.status(404).json({ success: false, message: "Invalid Password" });
+        }
+        generateTokenAndSetCookie(res, user._id);
+        res.status(200).json({
+            success: true, message: "User LoggedIn Sucessfully"
+        })
+
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
 }
 
 export const LogOut = async (req, res) => {
@@ -44,7 +65,6 @@ export const LogOut = async (req, res) => {
 }
 
 export const refreshToken = async (req, res) => {
-    console.warn(req.body)
     const { currentToken, email } = req.body;
 
     if (!currentToken || !email) {
@@ -69,7 +89,6 @@ export const refreshToken = async (req, res) => {
 
         return res.status(200).json({ token, refreshed, tokenValidTill });
     } catch (err) {
-        console.error("Token refresh error:", err);
         return res.status(401).json({ message: 'Invalid or expired token.' });
     }
 };
