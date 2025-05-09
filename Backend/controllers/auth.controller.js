@@ -3,8 +3,8 @@ import User from '../models/user.model.js';
 import sendWelcomeEmail from '../nodemailer/sendWelcomeEmail.js';
 import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js';
 import generateVerificationToken from '../utils/generateVerificationToken.js';
-import { get24HoursInMilliseconds } from '../utils/getSimpleThings.js';
 import { refreshCurrentToken } from '../utils/refreshToken.js';
+import { getVerificationTokenExpireTime } from '../utils/getSimpleThings.js'
 
 export const SignUp = async (req, res) => {
     const { email, password, name } = req.body;
@@ -19,7 +19,7 @@ export const SignUp = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const verificationToken = generateVerificationToken();
-        const user = new User({ email, password: hashedPassword, name, verificationToken, verificationTokenExpiresAt: get24HoursInMilliseconds() });
+        const user = new User({ email, password: hashedPassword, name, verificationToken, verificationTokenExpiresAt: getVerificationTokenExpireTime() });
         await user.save();
 
         generateTokenAndSetCookie(res, user._id);
@@ -75,7 +75,7 @@ export const LogOut = async (_req, res) => {
     }
 }
 
-export const refreshToken = async (req, res) => {
+export const RefreshToken = async (req, res) => {
     const { currentToken, email } = req.body;
 
     if (!currentToken || !email) {
@@ -120,6 +120,46 @@ export const DeleteUser = async (req, res) => {
             }
         }
 
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+}
+
+export const VerifyOTP = async (req, res) => {
+    const { otp } = req.body;
+    if (!otp) {
+        return res.status(404).json({ success: false, message: "Valid OTP is Required" });
+    }
+    try {
+        const userExists = await User.findOne({ verificationToken: otp });
+        if (!userExists) {
+            return res.status(404).json({ success: false, message: `An account associated with ${email} is not found` });
+        }
+        if (otp !== userExists.verificationToken || userExists.verificationTokenExpiresAt <= Date.now()) {
+            return res.status(400).json({ success: false, message: "The OTP you entered is not Valid or Expired" });
+        }
+        await User.findByIdAndUpdate(userExists._id, { $set: { isVerified: true } })
+        return res.status(200).json({ success: true, message: "OTP Verified Sucessfully" });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+}
+
+export const VerifyEmail = async (req, res) => {
+    const { email } = req.body;
+    console.log(email)
+    if (!email) {
+        return res.status(404).json({ success: false, message: "Email is Required" });
+    }
+    try {
+        const userExists = await User.findOne({ email });
+        console.log(userExists)
+        if (!userExists) {
+            return res.status(404).json({ success: false, message: `An account associated with ${email} is not found` });
+        }
+        const verificationToken = generateVerificationToken();
+        await User.findByIdAndUpdate(userExists._id, { $set: { verificationToken, verificationTokenExpiresAt: getVerificationTokenExpireTime() } }, { new: true });
+        return res.status(200).json({ success: true, message: "User is Valid, Password Reset Email has been sent" })
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
     }
