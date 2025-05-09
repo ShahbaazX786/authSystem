@@ -60,8 +60,17 @@ export const LogIn = async (req, res) => {
     }
 }
 
-export const LogOut = async (req, res) => {
-    res.send("Logout Page");
+export const LogOut = async (_req, res) => {
+    try {
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        });
+        return res.status(200).json({ success: true, message: "User Logged Out Sucessfully" });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
 }
 
 export const refreshToken = async (req, res) => {
