@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import User from '../models/user.model.js';
+import sendWelcomeEmail from '../nodemailer/sendWelcomeEmail.js';
 import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js';
 import generateVerificationToken from '../utils/generateVerificationToken.js';
 import { get24HoursInMilliseconds } from '../utils/getSimpleThings.js';
@@ -22,6 +23,7 @@ export const SignUp = async (req, res) => {
         await user.save();
 
         generateTokenAndSetCookie(res, user._id);
+        await sendWelcomeEmail(name, email, verificationToken);
         res.status(201).json({
             success: true, message: "User Created Sucessfully",
             user: {
