@@ -1,11 +1,12 @@
 import bcrypt from 'bcryptjs';
 import User from '../models/user.model.js';
+import jwt from 'jsonwebtoken';
+import sendPasswordResetEmail from '../nodemailer/sendPasswordResetEmail.js';
 import sendWelcomeEmail from '../nodemailer/sendWelcomeEmail.js';
 import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js';
 import generateVerificationToken from '../utils/generateVerificationToken.js';
+import { getVerificationTokenExpireTime } from '../utils/getSimpleThings.js';
 import { refreshCurrentToken } from '../utils/refreshToken.js';
-import { getVerificationTokenExpireTime } from '../utils/getSimpleThings.js'
-import sendPasswordResetEmail from '../nodemailer/sendPasswordResetEmail.js';
 
 export const SignUp = async (req, res) => {
     const { email, password, name } = req.body;
@@ -140,6 +141,8 @@ export const VerifyOTP = async (req, res) => {
             return res.status(400).json({ success: false, message: "The OTP you entered is not Valid or Expired" });
         }
         await User.findByIdAndUpdate(userExists._id, { $set: { isVerified: true } })
+
+        generateTokenAndSetCookie(res, userExists._id, true);
         return res.status(200).json({ success: true, message: "OTP Verified Sucessfully" });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
@@ -164,5 +167,32 @@ export const VerifyEmail = async (req, res) => {
         return res.status(200).json({ success: true, message: "User is Valid, Password Reset Email has been sent" })
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
+    }
+}
+
+export const ResetPassword = async (req, res) => {
+    try {
+        const { newPassword, confirmPassword, token } = req.body;
+        if (!newPassword || !confirmPassword || newPassword !== confirmPassword) {
+            return res.status(400).json({ success: false, message: "Passwords do not match or are invalid." });
+        }
+        if (!token) {
+            return res.status(401).json({ success: false, message: "Unauthorized or token missing." });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found." });
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        user.verificationToken = "";
+        user.verificationTokenExpiresAt = "";
+        await user.save();
+        res.status(200).json({ success: true, message: "Password has been reset successfully." });
+    } catch (error) {
+        console.error("Reset password error:", error);
+        return res.status(500).json({ success: false, message: "Something went wrong." });
     }
 }
