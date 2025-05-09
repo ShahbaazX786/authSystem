@@ -5,6 +5,7 @@ import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js
 import generateVerificationToken from '../utils/generateVerificationToken.js';
 import { refreshCurrentToken } from '../utils/refreshToken.js';
 import { getVerificationTokenExpireTime } from '../utils/getSimpleThings.js'
+import sendPasswordResetEmail from '../nodemailer/sendPasswordResetEmail.js';
 
 export const SignUp = async (req, res) => {
     const { email, password, name } = req.body;
@@ -159,6 +160,7 @@ export const VerifyEmail = async (req, res) => {
         }
         const verificationToken = generateVerificationToken();
         await User.findByIdAndUpdate(userExists._id, { $set: { verificationToken, verificationTokenExpiresAt: getVerificationTokenExpireTime() } }, { new: true });
+        sendPasswordResetEmail(userExists.name, email, verificationToken);
         return res.status(200).json({ success: true, message: "User is Valid, Password Reset Email has been sent" })
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
