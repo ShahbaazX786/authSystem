@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "s": "vite",
+    "s": "vite --port=7862",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
