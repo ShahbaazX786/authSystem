@@ -1,5 +1,8 @@
+import { Route, Routes } from "react-router-dom";
 import FloatingShapes from "./components/FloatingShape";
 import "./index.css";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 function App() {
   // return <div className="text-8xl bg-green-500 font-bold">Bismillah</div>;
@@ -26,6 +29,12 @@ function App() {
         left={"-10%"}
         delay={2}
       />
+
+      <Routes>
+        <Route path="/" element={"Home"} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+      </Routes>
     </div>
   );
 }
