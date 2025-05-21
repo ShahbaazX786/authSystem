@@ -43,7 +43,7 @@ const Login = () => {
 
           <div className="flex items-center">
             <Link
-              to={"/forgot-password"}
+              to={"/reset-password"}
               className="text-sm text-green-400 hover:underline"
             >
               Forgot Password?
