@@ -13,3 +13,7 @@ export type InputPropType = {
 
 export type ChangeEventType = React.ChangeEvent<HTMLInputElement>;
 export type FormEventType = React.FormEvent<HTMLFormElement>;
+
+export type PasswordStrengthPropType = {
+  password: string;
+};
