@@ -1,14 +1,14 @@
 import { motion } from "framer-motion";
 import { Loader } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ChangeEventKeyDownType } from "../utils/types";
 
 const EmailVerification = () => {
   const [code, setCode] = useState(["", "", "", "", ""]);
   const inputRefs = useRef([]);
-  const isLoading = true;
+  const isLoading = false;
 
-  const handleChange = (index: number, value: number) => {
+  const handleChange = (index: number, value: string) => {
     const newCode = [...code];
     if (value.length > 1) {
       const pastedCode = value.slice(0, 6).split("");
@@ -16,7 +16,9 @@ const EmailVerification = () => {
         newCode[i] = pastedCode[i] || "";
       }
       setCode(newCode);
-      const lastFilledIndex = newCode.findLastIndex((digit) => digit !== "");
+      const lastFilledIndex = newCode?.findLastIndex(
+        (digit: string) => digit !== ""
+      );
       const focusIndex = lastFilledIndex < 5 ? lastFilledIndex + 1 : 5;
       inputRefs.current[focusIndex].focus();
     } else {
@@ -34,13 +36,25 @@ const EmailVerification = () => {
     }
   };
 
+  const handleSubmit = (e: Event) => {
+    e.preventDefault();
+    const verificationCode = code.join("");
+    console.log(`Verification code submitted:${verificationCode}`);
+  };
+
+  useEffect(() => {
+    if (code.every((digit) => digit !== "")) {
+      handleSubmit(new Event("submit"));
+    }
+  });
+
   return (
     <div className="max-w-md w-full bg-gray-800/50 backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className=" max-w-md w-full bg-gray-800/50 backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden"
+        className=" max-w-md w-full p-8 bg-gray-800/50 backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden"
       >
         <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-green-400 to-emerald-500 text-transparent bg-clip-text">
           Verify Your Email
@@ -48,9 +62,9 @@ const EmailVerification = () => {
         <p className="text-center text-gray-300 mb-6">
           Enter the 6-digit code sent to your email address.
         </p>
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="flex justify-between">
-            {code.map((digit, index) => (
+            {code.map((digit: string, index: number) => (
               <input
                 key={index}
                 ref={(el) => (inputRefs.current[index] = el)}
@@ -77,7 +91,7 @@ const EmailVerification = () => {
               <span className="text-base">Verifying...</span>
             </div>
           ) : (
-            "Log In"
+            "Verify OTP"
           )}
         </motion.button>
       </motion.div>
