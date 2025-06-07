@@ -9,14 +9,14 @@ const EmailVerification = () => {
   const isLoading = false;
 
   const handleChange = (index: number, value: string) => {
-    const newCode = [...code];
+    const newCode = [...code] as [];
     if (value.length > 1) {
       const pastedCode = value.slice(0, 6).split("");
       for (let i = 0; i < 6; i++) {
-        newCode[i] = pastedCode[i] || "";
+        newCode[i] = pastedCode[i];
       }
       setCode(newCode);
-      const lastFilledIndex = newCode?.findLastIndex(
+      const lastFilledIndex = newCode.findLastIndex(
         (digit: string) => digit !== ""
       );
       const focusIndex = lastFilledIndex < 5 ? lastFilledIndex + 1 : 5;
@@ -36,7 +36,7 @@ const EmailVerification = () => {
     }
   };
 
-  const handleSubmit = (e: Event) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     const verificationCode = code.join("");
     console.log(`Verification code submitted:${verificationCode}`);
