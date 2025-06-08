@@ -18,3 +18,11 @@ export type FormEventType = React.FormEvent<HTMLFormElement>;
 export type PasswordStrengthPropType = {
   password: string;
 };
+
+export type RedirectAuthenticatedUserProps = {
+  children: React.ReactNode;
+  isAuthenticated: boolean;
+  user: any;
+};
+
+export type ProtectedRouteProps = RedirectAuthenticatedUserProps;
