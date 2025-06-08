@@ -1,13 +1,24 @@
+import { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
+import { Bounce, ToastContainer } from "react-toastify";
 import FloatingShapes from "./components/FloatingShape";
 import "./index.css";
+import Dashboard from "./pages/Dashboard";
 import EmailVerification from "./pages/EmailVerification";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import { Bounce, ToastContainer } from "react-toastify";
+import { useAuthStore } from "./store/authStore";
+import { ProtectedRoute } from "./utils/protectedRoute";
+import { RedirectAuthenticatedUser } from "./utils/redirect";
 
 function App() {
   // return <div className="text-8xl bg-green-500 font-bold">Bismillah</div>;
+  const { checkAuth, isAuthenticated, user } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-emerald-900 flex items-center justify-center relative overflow-hidden">
       <FloatingShapes
@@ -48,9 +59,36 @@ function App() {
       />
 
       <Routes>
-        <Route path="/" element={"Home"} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated} user={user}>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <RedirectAuthenticatedUser
+              isAuthenticated={isAuthenticated}
+              user={user}
+            >
+              <Signup />
+            </RedirectAuthenticatedUser>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <RedirectAuthenticatedUser
+              isAuthenticated={isAuthenticated}
+              user={user}
+            >
+              <Login />
+            </RedirectAuthenticatedUser>
+          }
+        />
         <Route path="/verify-email" element={<EmailVerification />} />
       </Routes>
     </div>
