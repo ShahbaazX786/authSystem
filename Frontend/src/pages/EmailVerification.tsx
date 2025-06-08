@@ -46,10 +46,13 @@ const EmailVerification = () => {
       await verifyEmail(verificationCode);
       if (user.email) {
         navigate("/");
-        toast.success("Wow so easy !");
+        toast.success("Email Verified Sucessfully", {
+          toastId: "Email_Verified",
+        });
       }
     } catch (e) {
-      toast.error(error);
+      const toastId = error;
+      toast.error(error, { toastId });
       console.error(e);
     }
   };
