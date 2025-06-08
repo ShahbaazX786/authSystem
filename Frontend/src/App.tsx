@@ -4,6 +4,7 @@ import "./index.css";
 import EmailVerification from "./pages/EmailVerification";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import { Bounce, ToastContainer } from "react-toastify";
 
 function App() {
   // return <div className="text-8xl bg-green-500 font-bold">Bismillah</div>;
@@ -29,6 +30,21 @@ function App() {
         top={"40%"}
         left={"-10%"}
         delay={2}
+      />
+
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+        stacked
       />
 
       <Routes>
