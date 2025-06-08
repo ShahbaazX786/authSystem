@@ -11,7 +11,7 @@ export const useAuthStore = create((set) => ({
   isCheckingAuth: false,
 
   signup: async (email: string, password: string, name: string) => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: "Unknown Error Occured" });
     try {
       const response = await axios.post(`${API_URL}/signup`, {
         email,
@@ -33,7 +33,7 @@ export const useAuthStore = create((set) => ({
   },
 
   verifyEmail: async (otp: string) => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: "Unknown Error Occured" });
     try {
       const response = await axios.post(`${API_URL}/verifyOtp`, { otp });
       set({
