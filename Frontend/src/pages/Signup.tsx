@@ -6,21 +6,29 @@ import Input from "../components/Input";
 import type { ChangeEventType, FormEventType } from "../utils/types";
 import PasswordStrengthChecker from "../components/PasswordStrengthChecker";
 import { useAuthStore } from "../store/authStore";
+import { toast } from "react-toastify";
 
 const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { signup, error, isLoading } = useAuthStore();
+  const { signup, error, isLoading, user } = useAuthStore();
   const navigate = useNavigate();
 
   const handleSignUp = async (e: FormEventType) => {
     e.preventDefault();
     try {
       await signup(email, password, name);
+      if (user.email) {
+        toast.success("Please Check Your Email For One Time Passcode", {
+          toastId: "OTP_SENT",
+        });
+      }
       navigate("/verify-email");
-    } catch (error) {
-      console.error(error);
+    } catch (e) {
+      const toastId = error;
+      toast.error(error, { toastId });
+      console.error(e);
     }
   };
   return (
