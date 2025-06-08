@@ -2,11 +2,15 @@ import { motion } from "framer-motion";
 import { Loader } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ChangeEventKeyDownType } from "../utils/types";
+import { useAuthStore } from "../store/authStore";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const EmailVerification = () => {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, verifyEmail, error, user } = useAuthStore();
+  const navigate = useNavigate();
 
   const handleChange = (index: number, value: string) => {
     const newCode = [...code];
@@ -35,14 +39,19 @@ const EmailVerification = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement> | Event) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | Event) => {
     e.preventDefault();
     const verificationCode = code.join("");
-    console.log(`Verification code submitted: ${verificationCode}`);
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+    try {
+      await verifyEmail(verificationCode);
+      if (user.email) {
+        navigate("/");
+        toast.success("Wow so easy !");
+      }
+    } catch (e) {
+      toast.error(error);
+      console.error(e);
+    }
   };
 
   useEffect(() => {
@@ -81,6 +90,8 @@ const EmailVerification = () => {
               />
             ))}
           </div>
+
+          {error && <p className="text-red-500 font-semibold mt-2">{error}</p>}
           <motion.button
             className="mt-5 w-full py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-lg shadow-lg hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition duration-200"
             whileHover={{ scale: 1.05 }}
