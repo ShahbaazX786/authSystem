@@ -3,6 +3,7 @@ import User from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
 import sendPasswordResetEmail from '../nodemailer/sendPasswordResetEmail.js';
 import sendWelcomeEmail from '../nodemailer/sendWelcomeEmail.js';
+import sendOTPVerifiedEmail from '../nodemailer/sendOTPVerifiedEmail.js'
 import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js';
 import generateVerificationToken from '../utils/generateVerificationToken.js';
 import { getVerificationTokenExpireTime } from '../utils/getSimpleThings.js';
@@ -143,6 +144,7 @@ export const VerifyOTP = async (req, res) => {
         await User.findByIdAndUpdate(userExists._id, { $set: { isVerified: true } })
 
         generateTokenAndSetCookie(res, userExists._id, true);
+        await sendOTPVerifiedEmail(userExists?.name, userExists?.email);
         return res.status(200).json({ success: true, message: "OTP Verified Sucessfully" });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
