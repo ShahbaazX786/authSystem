@@ -6,7 +6,7 @@ import cors from 'cors';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(cors({ origin: 'http://localhost:7862', credentials: true }))
+app.use(cors({ origin: process.env.ORIGIN, credentials: true }))
 
 app.use(express.json());
 app.use('/api/auth', authRoutes);
