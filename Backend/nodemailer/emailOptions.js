@@ -95,3 +95,43 @@ export const passwordResetEmailOptions = (name, email, otp) => {
 
     return PasswordResetEmailOptions;
 }
+
+export const OTPVerifiedEmailOptions = (name, email) => {
+    const app = process.env.APP_NAME;
+    const OTPVerifiedEmailOption = {
+        from: process.env.SENDER_EMAIL,
+        to: email,
+        subject: `Email Verified Sucessfully`,
+        text: `Hi ${name},\n\nYou have sucessfully verified your Email using one time passcode`,
+        html: `
+            <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td align="center" style="padding: 40px 0;">
+                            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                                <tr>
+                                    <td style="padding: 30px; text-align: center;">
+                                        <h1 style="color: #333;">Your Account is Now Verified!</h1>
+                                        <p style="font-size: 16px; color: #555;">
+                                            Hello <strong>${name}</strong>,
+                                        </p>
+                                        <p style="font-size: 16px; color: #555;">
+                                            Welcome To AuthSystems, A safe place to be secure.
+                                        </p>
+                                        <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+                                        <br/>
+                                        <p style="font-size: 14px; color: #aaa;">
+                                            – ${app} Team
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        `
+    };
+
+    return OTPVerifiedEmailOption;
+}
